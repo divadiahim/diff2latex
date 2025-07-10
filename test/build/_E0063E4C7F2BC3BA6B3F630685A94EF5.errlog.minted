@@ -1,0 +1,7 @@
+================================================================================
+
+File "/usr/share/texmf-dist/scripts/minted/latexminted-0.5.0-py3-none-any.whl/latexminted/load_data.py", line 48, in load_data
+  data = latex2pydata_loads(data_text, schema={'cachefiles': 'list[str]'}, schema_missing='verbatim')
+File "/usr/share/texmf-dist/scripts/minted/latex2pydata-0.5.0-py3-none-any.whl/latex2pydata/loading.py", line 91, in loads
+  raise Latex2PydataInvalidDataError(f'Loading data with ast.literal_eval() failed:\n{e}')
+
