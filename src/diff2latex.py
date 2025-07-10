@@ -6,7 +6,6 @@ HEADER = r"""
 \documentclass{article}
 \usepackage[table]{xcolor}
 \usepackage{tabularx}
-\usepackage{minted2}
 \usepackage[margin=1in]{geometry}
 \usepackage{courier}
 \usepackage{fvextra} % Better minted inside tables
@@ -42,43 +41,19 @@ CODE_CONFIG = r"""
 def make_document(content):
     return (
         r"""
+\begin{document}
 \begin{tabularx}{\linewidth}{r X r X}
 \multicolumn{1}{c}{\textbf{\#}} & \multicolumn{1}{c}{\textbf{Old Code}} &
 \multicolumn{1}{c}{\textbf{\#}} & \multicolumn{1}{c}{\textbf{New Code}} \\
 \hline
 %s
+\hline
 \end{tabularx}
 \end{document}
 """
         % content
     )
-
-
-def inline_diff(old_line, new_line):
-    matcher = difflib.SequenceMatcher(None, old_line, new_line)
-    old_parts, new_parts = "", ""
-    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
-        if tag == "equal":
-            old_parts += old_line[i1:i2]
-            new_parts += new_line[j1:j2]
-        elif tag == "replace":
-            old_parts += (
-                f"\\fcolorbox{{diffchar}}{{diffchar}}{{\\ttfamily {(old_line[i1:i2])}}}"
-            )
-            new_parts += (
-                f"\\fcolorbox{{diffchar}}{{diffchar}}{{\\ttfamily {(new_line[j1:j2])}}}"
-            )
-        elif tag == "delete":
-            old_parts += (
-                f"\\fcolorbox{{diffchar}}{{diffchar}}{{\\ttfamily {(old_line[i1:i2])}}}"
-            )
-        elif tag == "insert":
-            new_parts += (
-                f"\\fcolorbox{{diffchar}}{{diffchar}}{{\\ttfamily {(new_line[j1:j2])}}}"
-            )
-    return old_parts, new_parts
-
-
+    
 def sanitize(s):
     """Sanitize string for LaTeX."""
     return (
@@ -92,6 +67,34 @@ def sanitize(s):
         .replace("}", "\\}")
         .replace("#", "\\#")
     )
+
+
+def inline_diff(old_line, new_line):
+    matcher = difflib.SequenceMatcher(None, old_line, new_line)
+    old_chunks = []
+    new_chunks = []
+
+    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+        old_part = sanitize(old_line[i1:i2])
+        new_part = sanitize(new_line[j1:j2])
+
+        if tag == 'equal':
+            if old_part:
+                old_chunks.append(f"\\code{{{old_part}}}")
+                new_chunks.append(f"\\code{{{new_part}}}")
+        elif tag == 'replace':
+            if old_part:
+                old_chunks.append(f"\\fcolorbox{{diffchar}}{{diffchar}}{{\\code{{{old_part}}}}}")
+            if new_part:
+                new_chunks.append(f"\\fcolorbox{{diffchar}}{{diffchar}}{{\\code{{{new_part}}}}}")
+        elif tag == 'delete':
+            if old_part:
+                old_chunks.append(f"\\fcolorbox{{diffchar}}{{diffchar}}{{\\code{{{old_part}}}}}")
+        elif tag == 'insert':
+            if new_part:
+                new_chunks.append(f"\\fcolorbox{{diffchar}}{{diffchar}}{{\\code{{{new_part}}}}}")
+
+    return ' '.join(old_chunks), ' '.join(new_chunks)
 
 
 def parse_diff_lines(diff_lines):
@@ -123,6 +126,7 @@ def parse_diff_lines(diff_lines):
 
     # Detect inline changes
     processed_rows = []
+    row_map = {}
     left = right = 0
     for row in rows:
         old_n, old_val, new_n, new_val, color = row
@@ -145,15 +149,17 @@ def parse_diff_lines(diff_lines):
                     "",
                 )
             )
+            row_map[left] = row
             left += 1
         elif not old_n and new_n:
             # processed_rows[right] = processed_rows[right][:2] + (f"\\cellcolor{{addgreen}}{new_n}", f"\\cellcolor{{addgreen}}\\code{{{sanitize(new_val)}}}")
-            old_diff, new_diff = inline_diff(old_val, new_val)
+            local_old_n, local_old_val, _, _, _ = row_map[left - 1]
+            old_diff, new_diff = inline_diff(local_old_val, new_val)
             processed_rows[right] = (
-                f"\\cellcolor{{remred}}{old_n}",
-                f"\\cellcolor{{remred}}\\code{{{old_diff}}}",
+                f"\\cellcolor{{remred}}{local_old_n}",
+                f"\\cellcolor{{remred}}{old_diff}",
                 f"\\cellcolor{{addgreen}}{new_n}",
-                f"\\cellcolor{{addgreen}}\\code{{{new_diff}}}",
+                f"\\cellcolor{{addgreen}}{new_diff}",
             )
             right += 1
         else:
@@ -206,7 +212,7 @@ def main(diff_file_path):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) != 3:
         print("Usage: python diff_to_latex.py <language> <diff_file>")
         sys.exit(1)
-    main(sys.argv[1])
+    main(sys.argv[2])
