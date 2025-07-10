@@ -202,9 +202,7 @@ def main(diff_file_path):
     diff_rows = parse_diff_lines(diff_lines)
     latex_table = generate_latex_table(diff_rows)
 
-    with open("diff_table.tex", "w") as f:
-        f.write(latex_table)
-    print("LaTeX diff table written to diff_table.tex")
+    print(latex_table)
 
 
 if __name__ == "__main__":
