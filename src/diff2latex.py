@@ -18,7 +18,8 @@ HEADER = r"""
 COLORS = r"""
 \definecolor{addgreen}{RGB}{220,255,220}
 \definecolor{remred}{RGB}{255,220,220}
-\definecolor{diffchar}{RGB}{180,250,180} % inline change
+\definecolor{diffchargreen}{RGB}{180,250,180} % inline change
+\definecolor{diffcharred}{RGB}{250,180,180} % inline change
 \definecolor{lightgray}{gray}{0.95}
 """
 
@@ -34,7 +35,10 @@ LISTINGS_CONFIG = r"""
 """
 
 CODE_CONFIG = r"""
-\newcommand{\code}[1]{\lstinline[style=diffcode]!#1!}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcommand{\code}[1]{\lstinline[style=diffcode]§#1§}
+\setlength{\fboxsep}{0pt}  % inner padding
+\setlength{\fboxrule}{0pt} % border thickness
 """
 
 
@@ -42,7 +46,7 @@ def make_document(content):
     return (
         r"""
 \begin{document}
-\begin{tabularx}{\linewidth}{r X r X}
+\begin{tabularx}{\linewidth}{r Y r Y}
 \multicolumn{1}{c}{\textbf{\#}} & \multicolumn{1}{c}{\textbf{Old Code}} &
 \multicolumn{1}{c}{\textbf{\#}} & \multicolumn{1}{c}{\textbf{New Code}} \\
 \hline
@@ -84,17 +88,17 @@ def inline_diff(old_line, new_line):
                 new_chunks.append(f"\\code{{{new_part}}}")
         elif tag == 'replace':
             if old_part:
-                old_chunks.append(f"\\fcolorbox{{diffchar}}{{diffchar}}{{\\code{{{old_part}}}}}")
+                old_chunks.append(f"\\fcolorbox{{diffcharred}}{{diffcharred}}{{\\small\\ttfamily{{{old_part}}}}}")
             if new_part:
-                new_chunks.append(f"\\fcolorbox{{diffchar}}{{diffchar}}{{\\code{{{new_part}}}}}")
+                new_chunks.append(f"\\fcolorbox{{diffchargreen}}{{diffchargreen}}{{\\small\\ttfamily{{{new_part}}}}}")
         elif tag == 'delete':
             if old_part:
-                old_chunks.append(f"\\fcolorbox{{diffchar}}{{diffchar}}{{\\code{{{old_part}}}}}")
+                old_chunks.append(f"\\fcolorbox{{diffcharred}}{{diffcharred}}{{\\small\\ttfamily{{{old_part}}}}}")
         elif tag == 'insert':
             if new_part:
-                new_chunks.append(f"\\fcolorbox{{diffchar}}{{diffchar}}{{\\code{{{new_part}}}}}")
+                new_chunks.append(f"\\fcolorbox{{diffchargreen}}{{diffchargreen}}{{\\small\\ttfamily{{{new_part}}}}}")
 
-    return ' '.join(old_chunks), ' '.join(new_chunks)
+    return ''.join(old_chunks), ''.join(new_chunks)
 
 
 def parse_diff_lines(diff_lines):
@@ -130,16 +134,6 @@ def parse_diff_lines(diff_lines):
     left = right = 0
     for row in rows:
         old_n, old_val, new_n, new_val, color = row
-        # if old_n and new_n and old_val != new_val:
-        #     old_diff, new_diff = inline_diff(old_val, new_val)
-        #     processed_rows.append((f"\\cellcolor{{remred}}{old_n}", f"\\cellcolor{{remred}}\\code{{{old_diff}}}",
-        #                            f"\\cellcolor{{addgreen}}{new_n}", f"\\cellcolor{{addgreen}}\\code{{{new_diff}}}"))
-        # elif old_n and not new_n:  # Removed
-        #     processed_rows.append((f"\\cellcolor{{remred}}{old_n}", f"\\cellcolor{{remred}}\\code{{{old_val.replace(" ", "\\ ")}}}", "", ""))
-        # elif not old_n and new_n:  # Added
-        #     processed_rows.append(("", "", f"\\cellcolor{{addgreen}}{new_n}", f"\\cellcolor{{addgreen}}\\code{{{new_val.replace(" ", "\\ ")}}}"))
-        # else:  # Unchanged
-        #     processed_rows.append((old_n, f"\\code{{{old_val}}}", new_n, f"\\code{{{new_val}}}"))
         if old_n and not new_n:
             processed_rows.append(
                 (
@@ -178,12 +172,6 @@ def parse_diff_lines(diff_lines):
 
 
 def generate_latex_table(diff_rows):
-    # latex = [
-    #     "\\begin{tabularx}{\\linewidth}{r X r X}",
-    #     "\\multicolumn{1}{c}{\\textbf{\\#}} & \\multicolumn{1}{c}{\\textbf{Old Code}} &",
-    #     "\\multicolumn{1}{c}{\\textbf{\\#}} & \\multicolumn{1}{c}{\\textbf{New Code}} \\\\",
-    #     "\\hline",
-    # ]
     content = []
 
     for row in diff_rows:
@@ -197,7 +185,6 @@ def generate_latex_table(diff_rows):
         make_document("\n".join(content)),
     ]
         
-    # content.append("\\hline\n\\end{tabularx}")
     return "\n".join(latex)
 
 

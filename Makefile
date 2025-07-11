@@ -1,12 +1,12 @@
 include .env
 
 PYC = python
-LATEXC = pdflatex
+LATEXC = lualatex
 
-LANG ?= python
+LANGUAGE ?= python
 DIFF_FILE ?= your_diff_file.diff
 
-BUILD_DIR = build-$(LANG)
+BUILD_DIR = build-$(LANGUAGE)
 LATEX_O_DIR = $(BUILD_DIR)/latex
 PDF_O_DIR = $(BUILD_DIR)/pdf
 
@@ -14,8 +14,8 @@ SRC_DIR = src
 
 build:
 	@mkdir -p $(LATEX_O_DIR) $(PDF_O_DIR)
-	@echo "Building for language: $(LANG) with diff file: $(DIFF_FILE)"
-	$(PYC) $(SRC_DIR)/diff2latex.py $(LANG) $(DIFF_FILE) > $(LATEX_O_DIR)/diff2latex.tex
+	@echo "Building for language: $(LANGUAGE) with diff file: $(DIFF_FILE)"
+	$(PYC) $(SRC_DIR)/diff2latex.py $(LANGUAGE) $(DIFF_FILE) > $(LATEX_O_DIR)/diff2latex.tex
 
 build-pdf:
 	@echo "Compiling LaTeX to PDF..."
