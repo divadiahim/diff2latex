@@ -12,6 +12,7 @@ HEADER = r"""
 \usepackage{comment}
 \usepackage{listings}
 \usepackage{ltablex}
+\usepackage{fontspec}
 \keepXColumns
 """
 
@@ -25,7 +26,7 @@ COLORS = r"""
 
 LISTINGS_CONFIG = r"""
 \lstdefinestyle{diffcode}{
-    basicstyle=\fontencoding{T1}\selectfont\small\ttfamily,
+    basicstyle=\fontencoding{T1}\fontfamily{SourceSansPro-TLF}\selectfont\small,
     upquote=true,
     backgroundcolor=\color{lightgray},
     language=Python,
@@ -34,11 +35,22 @@ LISTINGS_CONFIG = r"""
 }
 """
 
+BOX_CONFIG = r"""
+\setlength{\fboxsep}{0pt}  % inner padding
+\setlength{\fboxrule}{0pt} % border thickness
+\newfontfamily\sourcesanspro{Source Sans Pro}
+\newcommand{\boxx}[2]{%
+  \fcolorbox{#1}{#1}{%
+    \small%
+    \sourcesanspro%
+    \strut #2%
+  }%
+}
+"""
+
 CODE_CONFIG = r"""
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
 \newcommand{\code}[1]{\lstinline[style=diffcode]§#1§}
-\setlength{\fboxsep}{0pt}  % inner padding
-\setlength{\fboxrule}{0pt} % border thickness
 """
 
 
@@ -57,7 +69,8 @@ def make_document(content):
 """
         % content
     )
-    
+
+
 def sanitize(s):
     """Sanitize string for LaTeX."""
     return (
@@ -74,101 +87,121 @@ def sanitize(s):
 
 
 def inline_diff(old_line, new_line):
-    matcher = difflib.SequenceMatcher(None, old_line, new_line)
+    old_indent = len(old_line) - len(old_line.lstrip())
+    new_indent = len(new_line) - len(new_line.lstrip())
+
+    old_tokens = old_line.lstrip().split()
+    new_tokens = new_line.lstrip().split()
+    matcher = difflib.SequenceMatcher(None, old_tokens, new_tokens)
+
     old_chunks = []
     new_chunks = []
 
     for tag, i1, i2, j1, j2 in matcher.get_opcodes():
-        old_part = sanitize(old_line[i1:i2])
-        new_part = sanitize(new_line[j1:j2])
+        old_part = " ".join(sanitize(tok) for tok in old_tokens[i1:i2])
+        new_part = " ".join(sanitize(tok) for tok in new_tokens[j1:j2])
 
-        if tag == 'equal':
+        if tag == "equal":
             if old_part:
                 old_chunks.append(f"\\code{{{old_part}}}")
                 new_chunks.append(f"\\code{{{new_part}}}")
-        elif tag == 'replace':
+        elif tag == "replace":
             if old_part:
-                old_chunks.append(f"\\fcolorbox{{diffcharred}}{{diffcharred}}{{\\small\\ttfamily{{{old_part}}}}}")
+                old_chunks.append(f"\\boxx{{diffcharred}}{{{old_part}}}")
             if new_part:
-                new_chunks.append(f"\\fcolorbox{{diffchargreen}}{{diffchargreen}}{{\\small\\ttfamily{{{new_part}}}}}")
-        elif tag == 'delete':
+                new_chunks.append(f"\\boxx{{diffchargreen}}{{{new_part}}}")
+        elif tag == "delete":
             if old_part:
-                old_chunks.append(f"\\fcolorbox{{diffcharred}}{{diffcharred}}{{\\small\\ttfamily{{{old_part}}}}}")
-        elif tag == 'insert':
+                old_chunks.append(f"\\boxx{{diffcharred}}{{{old_part}}}")
+        elif tag == "insert":
             if new_part:
-                new_chunks.append(f"\\fcolorbox{{diffchargreen}}{{diffchargreen}}{{\\small\\ttfamily{{{new_part}}}}}")
+                new_chunks.append(f"\\boxx{{diffchargreen}}{{{new_part}}}")
 
-    return ''.join(old_chunks), ''.join(new_chunks)
+    old_indent_str = "\\ " * old_indent if old_indent > 0 else ""
+    new_indent_str = "\\ " * new_indent if new_indent > 0 else ""
+
+    old_result = old_indent_str + " ".join(old_chunks)
+    new_result = new_indent_str + " ".join(new_chunks)
+    return old_result, new_result
+
+
+def flush_hunk(hunk):
+    old_lineno = new_lineno = 1
+    paired = []
+    deletions = [line[1:].rstrip() for line in hunk if line.startswith("-")]
+    additions = [line[1:].rstrip() for line in hunk if line.startswith("+")]
+    max_len = max(len(deletions), len(additions))
+
+    for i in range(max_len):
+        old_line = deletions[i] if i < len(deletions) else ""
+        new_line = additions[i] if i < len(additions) else ""
+
+        if old_line and new_line:
+            old_diff, new_diff = inline_diff(old_line, new_line)
+            paired.append(
+                (
+                    f"\\cellcolor{{remred}}{old_lineno}",
+                    f"\\cellcolor{{remred}}{old_diff}",
+                    f"\\cellcolor{{addgreen}}{new_lineno}",
+                    f"\\cellcolor{{addgreen}}{new_diff}",
+                )
+            )
+            old_lineno += 1
+            new_lineno += 1
+        elif old_line:
+            paired.append(
+                (
+                    f"\\cellcolor{{remred}}{old_lineno}",
+                    f"\\cellcolor{{remred}}\\code{{{sanitize(old_line)}}}",
+                    "",
+                    "",
+                )
+            )
+            old_lineno += 1
+        elif new_line:
+            paired.append(
+                (
+                    "",
+                    "",
+                    f"\\cellcolor{{addgreen}}{new_lineno}",
+                    f"\\cellcolor{{addgreen}}\\code{{{sanitize(new_line)}}}",
+                )
+            )
+            new_lineno += 1
+    return paired
 
 
 def parse_diff_lines(diff_lines):
-    old_code = []
-    new_code = []
-    old_lineno = new_lineno = 1
     rows = []
+    old_lineno = new_lineno = 1
+    hunk = []
 
     for line in diff_lines:
         if line.startswith("---") or line.startswith("+++") or line.startswith("@@"):
             continue
-        if line.startswith("-"):
-            content = line[1:].rstrip()
-            rows.append((old_lineno, (content), "", "", "remred"))
-            old_code.append(content)
-            old_lineno += 1
-        elif line.startswith("+"):
-            content = line[1:].rstrip()
-            rows.append(("", "", new_lineno, (content), "addgreen"))
-            new_code.append(content)
-            new_lineno += 1
+        elif line.startswith("-") or line.startswith("+"):
+            hunk.append(line)
         else:
+            if hunk:
+                rows.extend(flush_hunk(hunk))
+                hunk = []
+
             content = line[1:].rstrip() if line.startswith(" ") else line.rstrip()
-            rows.append((old_lineno, (content), new_lineno, (content), ""))
-            old_code.append(content)
-            new_code.append(content)
+            rows.append(
+                (
+                    str(old_lineno),
+                    f"\\code{{{sanitize(content)}}}",
+                    str(new_lineno),
+                    f"\\code{{{sanitize(content)}}}",
+                )
+            )
             old_lineno += 1
             new_lineno += 1
 
-    # Detect inline changes
-    processed_rows = []
-    row_map = {}
-    left = right = 0
-    for row in rows:
-        old_n, old_val, new_n, new_val, color = row
-        if old_n and not new_n:
-            processed_rows.append(
-                (
-                    f"\\cellcolor{{remred}}{old_n}",
-                    f"\\cellcolor{{remred}}\\code{{{sanitize(old_val)}}}",
-                    "",
-                    "",
-                )
-            )
-            row_map[left] = row
-            left += 1
-        elif not old_n and new_n:
-            # processed_rows[right] = processed_rows[right][:2] + (f"\\cellcolor{{addgreen}}{new_n}", f"\\cellcolor{{addgreen}}\\code{{{sanitize(new_val)}}}")
-            local_old_n, local_old_val, _, _, _ = row_map[left - 1]
-            old_diff, new_diff = inline_diff(local_old_val, new_val)
-            processed_rows[right] = (
-                f"\\cellcolor{{remred}}{local_old_n}",
-                f"\\cellcolor{{remred}}{old_diff}",
-                f"\\cellcolor{{addgreen}}{new_n}",
-                f"\\cellcolor{{addgreen}}{new_diff}",
-            )
-            right += 1
-        else:
-            processed_rows.append(
-                (
-                    old_n,
-                    f"\\code{{{sanitize(old_val)}}}",
-                    new_n,
-                    f"\\code{{{sanitize(new_val)}}}",
-                )
-            )
-            left += 1
-            right = left
+    if hunk:
+        rows.extend(flush_hunk(hunk))
 
-    return processed_rows
+    return rows
 
 
 def generate_latex_table(diff_rows):
@@ -176,15 +209,16 @@ def generate_latex_table(diff_rows):
 
     for row in diff_rows:
         content.append(" & ".join(str(col) for col in row) + " \\\\")
-        
+
     latex = [
         HEADER,
         COLORS,
         LISTINGS_CONFIG,
         CODE_CONFIG,
+        BOX_CONFIG,
         make_document("\n".join(content)),
     ]
-        
+
     return "\n".join(latex)
 
 
