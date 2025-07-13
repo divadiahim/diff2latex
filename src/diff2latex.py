@@ -1,6 +1,7 @@
 import sys
 import difflib
 from itertools import zip_longest
+import re
 
 HEADER = r"""
 \documentclass{article}
@@ -16,6 +17,10 @@ HEADER = r"""
 \keepXColumns
 """
 
+FONT_CONFIG = r"""
+\newfontface\jbm{Fira Code}[Contextuals={WordInitial,WordFinal}]
+"""
+
 COLORS = r"""
 \definecolor{addgreen}{RGB}{220,255,220}
 \definecolor{remred}{RGB}{255,220,220}
@@ -26,7 +31,7 @@ COLORS = r"""
 
 LISTINGS_CONFIG = r"""
 \lstdefinestyle{diffcode}{
-    basicstyle=\fontencoding{T1}\fontfamily{SourceSansPro-TLF}\selectfont\small,
+    basicstyle=\fontencoding{T1}\jbm\selectfont\small,
     upquote=true,
     backgroundcolor=\color{lightgray},
     language=Python,
@@ -38,11 +43,10 @@ LISTINGS_CONFIG = r"""
 BOX_CONFIG = r"""
 \setlength{\fboxsep}{0pt}  % inner padding
 \setlength{\fboxrule}{0pt} % border thickness
-\newfontfamily\sourcesanspro{Source Sans Pro}
 \newcommand{\boxx}[2]{%
   \fcolorbox{#1}{#1}{%
     \small%
-    \sourcesanspro%
+    \jbm%
     \strut #2%
   }%
 }
@@ -51,8 +55,8 @@ BOX_CONFIG = r"""
 CODE_CONFIG = r"""
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
 \newcommand{\code}[1]{\lstinline[style=diffcode]§#1§}
+\newcommand{\codett}[1]{\jbm\selectfont\small\texttt{#1}}
 """
-
 
 def make_document(content):
     return (
@@ -74,37 +78,50 @@ def make_document(content):
 def sanitize(s):
     """Sanitize string for LaTeX."""
     return (
-        s.replace("\\", "\\textbackslash{}")
+        s.replace("\\", "\\\\")
         .replace("%", "\\%")
         .replace("$", "\\$")
         .replace("&", "\\&")
-        .replace("  ", "\\ \\ ")
+        .replace(" ", "\\ ")
         .replace("_", "\\_")
         .replace("{", "\\{")
         .replace("}", "\\}")
         .replace("#", "\\#")
+        .replace("~", "\\~")
     )
 
+def fix_wspace_latex(s):
+    if not s.replace('\\', '').strip():
+        return f"\\codett{{{s}}}" 
+    return f"\\code{{{s}}}"
+
+def tokenize(line):
+    return re.findall(r"\s+|\w+|[^\w\s]", line)
 
 def inline_diff(old_line, new_line):
-    old_indent = len(old_line) - len(old_line.lstrip())
-    new_indent = len(new_line) - len(new_line.lstrip())
-
-    old_tokens = old_line.lstrip().split()
-    new_tokens = new_line.lstrip().split()
+    old_tokens = tokenize(old_line)
+    new_tokens = tokenize(new_line)
     matcher = difflib.SequenceMatcher(None, old_tokens, new_tokens)
 
     old_chunks = []
     new_chunks = []
 
     for tag, i1, i2, j1, j2 in matcher.get_opcodes():
-        old_part = " ".join(sanitize(tok) for tok in old_tokens[i1:i2])
-        new_part = " ".join(sanitize(tok) for tok in new_tokens[j1:j2])
+        old_part = "".join(sanitize(tok) for tok in old_tokens[i1:i2])
+        new_part = "".join(sanitize(tok) for tok in new_tokens[j1:j2])
+        
+        # print(
+        #     f"Tag: {tag}, "
+        #     f"Old: \033[41m{old_part}\033[0m, "
+        #     f"New: \033[42m{new_part}\033[0m",
+        #     file=sys.stderr,
+        # )  # Debugging output with diff colors
+
 
         if tag == "equal":
             if old_part:
-                old_chunks.append(f"\\code{{{old_part}}}")
-                new_chunks.append(f"\\code{{{new_part}}}")
+                old_chunks.append(fix_wspace_latex(old_part))
+                new_chunks.append(fix_wspace_latex(new_part))
         elif tag == "replace":
             if old_part:
                 old_chunks.append(f"\\boxx{{diffcharred}}{{{old_part}}}")
@@ -117,16 +134,16 @@ def inline_diff(old_line, new_line):
             if new_part:
                 new_chunks.append(f"\\boxx{{diffchargreen}}{{{new_part}}}")
 
-    old_indent_str = "\\ " * old_indent if old_indent > 0 else ""
-    new_indent_str = "\\ " * new_indent if new_indent > 0 else ""
+    # old_indent_str = "\\ " * old_indent if old_indent > 0 else ""
+    # new_indent_str = "\\ " * new_indent if new_indent > 0 else ""
 
-    old_result = old_indent_str + " ".join(old_chunks)
-    new_result = new_indent_str + " ".join(new_chunks)
+    old_result = "".join(old_chunks)
+    new_result = "".join(new_chunks)
     return old_result, new_result
 
 
-def flush_hunk(hunk):
-    old_lineno = new_lineno = 1
+def flush_hunk(hunk, line_nr=1):
+    old_lineno = new_lineno = line_nr
     paired = []
     deletions = [line[1:].rstrip() for line in hunk if line.startswith("-")]
     additions = [line[1:].rstrip() for line in hunk if line.startswith("+")]
@@ -173,7 +190,7 @@ def flush_hunk(hunk):
 
 def parse_diff_lines(diff_lines):
     rows = []
-    old_lineno = new_lineno = 1
+    line_nr = 1
     hunk = []
 
     for line in diff_lines:
@@ -183,20 +200,19 @@ def parse_diff_lines(diff_lines):
             hunk.append(line)
         else:
             if hunk:
-                rows.extend(flush_hunk(hunk))
+                rows.extend(flush_hunk(hunk, line_nr))
                 hunk = []
 
             content = line[1:].rstrip() if line.startswith(" ") else line.rstrip()
             rows.append(
                 (
-                    str(old_lineno),
+                    str(line_nr),
                     f"\\code{{{sanitize(content)}}}",
-                    str(new_lineno),
+                    str(line_nr),
                     f"\\code{{{sanitize(content)}}}",
                 )
             )
-            old_lineno += 1
-            new_lineno += 1
+            line_nr += 1
 
     if hunk:
         rows.extend(flush_hunk(hunk))
@@ -212,6 +228,7 @@ def generate_latex_table(diff_rows):
 
     latex = [
         HEADER,
+        FONT_CONFIG,
         COLORS,
         LISTINGS_CONFIG,
         CODE_CONFIG,

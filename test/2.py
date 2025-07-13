@@ -47,3 +47,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+        old_part = " ".join(sanitize(tok) for tok in old_tokens[i1:i2])
+        new_part = " ".join(sanitize(tok) for tok in new_tokens[j1:j2])

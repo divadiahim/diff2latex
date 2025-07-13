@@ -1,7 +1,7 @@
 include .env
 
 PYC = python
-LATEXC = lualatex
+LATEXC = xelatex
 
 LANGUAGE ?= python
 DIFF_FILE ?= your_diff_file.diff
