@@ -29,24 +29,9 @@ COLORS = r"""
 \definecolor{remred}{RGB}{255,220,220}
 \definecolor{diffchargreen}{RGB}{180,250,180} % inline change
 \definecolor{diffcharred}{RGB}{250,180,180} % inline change
-\definecolor{lightgray}{gray}{0.90}
-"""
-
-LISTINGS_CONFIG = r"""
-\lstdefinestyle{diffcode}{
-    basicstyle=\fontencoding{T1}\jbm\selectfont\scriptsize,
-    upquote=true,
-    backgroundcolor=\color{lightgray},
-    language=Python,
-    showstringspaces=false,
-    breaklines=true,
-    escapechar=§
-}
 """
 
 BOX_CONFIG = r"""
-\setlength{\fboxsep}{0pt}  % inner padding
-\setlength{\fboxrule}{0pt} % border thickness
 \newcommand{\boxx}[2]{%
     \jbm\selectfont\footnotesize\highLight[#1]{\texttt{#2}}%
 }
@@ -89,9 +74,6 @@ def sanitize(s):
         .replace("~", "\\~")
     )
 
-def fix_wspace_latex(s): 
-    return f"\\code{{{s}}}"
-
 def tokenize(line):
     return re.findall(r"\s+|\w+|[^\w\s]", line)
 
@@ -106,19 +88,11 @@ def inline_diff(old_line, new_line):
     for tag, i1, i2, j1, j2 in matcher.get_opcodes():
         old_part = "".join(sanitize(tok) for tok in old_tokens[i1:i2])
         new_part = "".join(sanitize(tok) for tok in new_tokens[j1:j2])
-        
-        # print(
-        #     f"Tag: {tag}, "
-        #     f"Old: \033[41m{old_part}\033[0m, "
-        #     f"New: \033[42m{new_part}\033[0m",
-        #     file=sys.stderr,
-        # )  # Debugging output with diff colors
-
 
         if tag == "equal":
             if old_part:
-                old_chunks.append(fix_wspace_latex(old_part))
-                new_chunks.append(fix_wspace_latex(new_part))
+                old_chunks.append(f"\\code{{{old_part}}}")
+                new_chunks.append(f"\\code{{{new_part}}}")
         elif tag == "replace":
             if old_part:
                 old_chunks.append(f"\\boxx{{diffcharred}}{{{old_part}}}")
@@ -130,9 +104,6 @@ def inline_diff(old_line, new_line):
         elif tag == "insert":
             if new_part:
                 new_chunks.append(f"\\boxx{{diffchargreen}}{{{new_part}}}")
-
-    # old_indent_str = "\\ " * old_indent if old_indent > 0 else ""
-    # new_indent_str = "\\ " * new_indent if new_indent > 0 else ""
 
     old_result = "".join(old_chunks)
     new_result = "".join(new_chunks)
@@ -227,7 +198,6 @@ def generate_latex_table(diff_rows):
         HEADER,
         FONT_CONFIG,
         COLORS,
-        LISTINGS_CONFIG,
         CODE_CONFIG,
         BOX_CONFIG,
         make_document("\n".join(content)),
