@@ -31,7 +31,7 @@ COLORS = r"""
 
 LISTINGS_CONFIG = r"""
 \lstdefinestyle{diffcode}{
-    basicstyle=\fontencoding{T1}\jbm\selectfont\small,
+    basicstyle=\fontencoding{T1}\jbm\selectfont\scriptsize,
     upquote=true,
     backgroundcolor=\color{lightgray},
     language=Python,
@@ -45,7 +45,7 @@ BOX_CONFIG = r"""
 \setlength{\fboxrule}{0pt} % border thickness
 \newcommand{\boxx}[2]{%
   \fcolorbox{#1}{#1}{%
-    \small%
+    \scriptsize%
     \jbm%
     \strut #2%
   }%
@@ -55,7 +55,7 @@ BOX_CONFIG = r"""
 CODE_CONFIG = r"""
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
 \newcommand{\code}[1]{\lstinline[style=diffcode]§#1§}
-\newcommand{\codett}[1]{\jbm\selectfont\small\texttt{#1}}
+\newcommand{\codett}[1]{\jbm\selectfont\scriptsize\texttt{#1}}
 """
 
 def make_document(content):
