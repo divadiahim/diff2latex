@@ -23,7 +23,7 @@ class Example:
         elif self.value == -1:  # Changed 0 to -1
             return None
         else:
-            raise ValueError("Too negative!")  # Changed error message
+            raise ValueError("Too negative!")  # Changed error message and a liot of other things and many more sthings and erhlghs eskjrhg ewg ewkh lk4w5ypow45klthq3 k45hkjlw hkj54wnt 3q5t 5iuyg4wiu hq5k4nt kjl35wht jgwhj we hjl ghwergewrjgh erwjgh ewrkjgh erwkljgh ewrrg ewrgj herwg erwrgh ewjrgh ewrjgh werjlgjj hwerkljgh wergj hewrkjgh wergh wergh  ewrkjlgherw gerwkjlhgkl wergkjlw ewrjgh wergh werkjgh kj jkerhgj wegr
 
 def main():
     if a:
@@ -51,3 +51,4 @@ if __name__ == "__main__":
 
         old_part = " ".join(sanitize(tok) for tok in old_tokens[i1:i2])
         new_part = " ".join(sanitize(tok) for tok in new_tokens[j1:j2])
+        

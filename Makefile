@@ -1,7 +1,7 @@
 include .env
 
 PYC = python
-LATEXC = xelatex
+LATEXC = lualatex
 
 LANGUAGE ?= python
 DIFF_FILE ?= your_diff_file.diff
@@ -16,6 +16,11 @@ build:
 	@mkdir -p $(LATEX_O_DIR) $(PDF_O_DIR)
 	@echo "Building for language: $(LANGUAGE) with diff file: $(DIFF_FILE)"
 	$(PYC) $(SRC_DIR)/diff2latex.py $(LANGUAGE) $(DIFF_FILE) > $(LATEX_O_DIR)/diff2latex.tex
+
+build2:
+	@mkdir -p $(LATEX_O_DIR) $(PDF_O_DIR)
+	@echo "Building for language: $(LANGUAGE) with diff file: $(DIFF_FILE)"
+	$(PYC) $(SRC_DIR)/diff2latex2.py $(LANGUAGE) $(DIFF_FILE) > $(LATEX_O_DIR)/diff2latex.tex
 
 build-pdf:
 	@echo "Compiling LaTeX to PDF..."

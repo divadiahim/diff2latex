@@ -53,3 +53,4 @@ if __name__ == "__main__":
 
         old_part = sanitize(old_line[i1:i2])
         new_part = sanitize(new_line[j1:j2])
+        

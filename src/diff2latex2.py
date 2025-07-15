@@ -14,6 +14,9 @@ HEADER = r"""
 \usepackage{listings}
 \usepackage{ltablex}
 \usepackage{fontspec}
+\usepackage{ulem} % For underlining
+\usepackage{luacolor}
+\usepackage{lua-ul}
 \keepXColumns
 """
 
@@ -24,8 +27,8 @@ FONT_CONFIG = r"""
 COLORS = r"""
 \definecolor{addgreen}{RGB}{220,255,220}
 \definecolor{remred}{RGB}{255,220,220}
-\definecolor{diffchargreen}{RGB}{0,180,0}    % vivid green
-\definecolor{diffcharred}{RGB}{200,0,0}      % strong red
+\definecolor{diffchargreen}{RGB}{180,250,180} % inline change
+\definecolor{diffcharred}{RGB}{250,180,180} % inline change
 \definecolor{lightgray}{gray}{0.90}
 """
 
@@ -45,14 +48,13 @@ BOX_CONFIG = r"""
 \setlength{\fboxsep}{0pt}  % inner padding
 \setlength{\fboxrule}{0pt} % border thickness
 \newcommand{\boxx}[2]{%
-    \lstinline[style=diffcode, keywordstyle=\color{#1}, basicstyle=\fontencoding{T1}\jbm\selectfont\scriptsize\color{#1}]§#2§%
+    \jbm\selectfont\footnotesize\highLight[#1]{\texttt{#2}}%
 }
 """
 
 CODE_CONFIG = r"""
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
-\newcommand{\code}[1]{\lstinline[style=diffcode]§#1§}
-\newcommand{\codett}[1]{\jbm\selectfont\scriptsize\texttt{#1}}
+\newcommand{\code}[1]{\jbm\selectfont\footnotesize\texttt{#1}}
 """
 
 def make_document(content):
@@ -75,7 +77,7 @@ def make_document(content):
 def sanitize(s):
     """Sanitize string for LaTeX."""
     return (
-        s.replace("\\", "\\\\")
+        s.replace("\\", "\\textbackslash")
         .replace("%", "\\%")
         .replace("$", "\\$")
         .replace("&", "\\&")
@@ -87,9 +89,7 @@ def sanitize(s):
         .replace("~", "\\~")
     )
 
-def fix_wspace_latex(s):
-    if not s.replace('\\', '').strip():
-        return f"\\codett{{{s}}}" 
+def fix_wspace_latex(s): 
     return f"\\code{{{s}}}"
 
 def tokenize(line):

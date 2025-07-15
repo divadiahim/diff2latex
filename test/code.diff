@@ -1,5 +1,5 @@
---- 1.py	2025-07-10 18:51:27.157320647 +0200
-+++ 2.py	2025-07-10 19:18:57.571908451 +0200
+--- 1.py	2025-07-15 15:39:00.622281582 +0200
++++ 2.py	2025-07-15 15:54:15.269346680 +0200
 @@ -1,35 +1,33 @@
 -# Keywords & syntax demo (A)
 +# Keywords & syntax demo (B)
@@ -34,7 +34,7 @@
              return None
          else:
 -            raise ValueError("Negative!")
-+            raise ValueError("Too negative!")  # Changed error message
++            raise ValueError("Too negative!")  # Changed error message and a liot of other things and many more sthings and erhlghs eskjrhg ewg ewkh lk4w5ypow45klthq3 k45hkjlw hkj54wnt 3q5t 5iuyg4wiu hq5k4nt kjl35wht jgwhj we hjl ghwergewrjgh erwjgh ewrkjgh erwkljgh ewrrg ewrgj herwg erwrgh ewjrgh ewrjgh werjlgjj hwerkljgh wergj hewrkjgh wergh wergh  ewrkjlgherw gerwkjlhgkl wergkjlw ewrjgh wergh werkjgh kj jkerhgj wegr
  
  def main():
 -    e = Example(2)
@@ -46,7 +46,7 @@
      match e.value:
          case 0:
              print("Zero")
-@@ -41,11 +39,11 @@
+@@ -41,16 +39,16 @@
      def inner(*args, **kwargs):
          global x
          nonlocal result
@@ -61,3 +61,11 @@
  
  if __name__ == "__main__":
      main()
+ 
+ 
+-        old_part = sanitize(old_line[i1:i2])
+-        new_part = sanitize(new_line[j1:j2])
++        old_part = " ".join(sanitize(tok) for tok in old_tokens[i1:i2])
++        new_part = " ".join(sanitize(tok) for tok in new_tokens[j1:j2])
+         
+\ No newline at end of file
