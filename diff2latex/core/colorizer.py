@@ -1,9 +1,12 @@
 from pygments import lex
-from pygments.lexers import PythonLexer
+from pygments.lexers import PythonLexer, RustLexer
+from pygments.lexers import get_all_lexers, _load_lexers
 from pygments.styles import get_style_by_name
 from pygments.token import Token
 
 def get_char_colors(code, style_name="monokai"):
+    _load_lexers(module
+    get_all_lexers()  # Load all lexers to ensure availability
     style = get_style_by_name(style_name)
     token_colors = {
         token: f"{style.styles[token]}" if style.styles[token] else "#000000"

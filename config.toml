@@ -1,0 +1,14 @@
+title = "diff2latex"
+
+[font]
+family = "JetBrains Mono"
+size = 10
+contextuals = ["WordInitial", "WordFinal"]
+
+[colors]
+addgreen = "#b4ffb4"
+remred = "#ffb4b4"
+diffchargreen = "#50dc50"
+diffcharred = "#dc5050"
+
+[styles]
