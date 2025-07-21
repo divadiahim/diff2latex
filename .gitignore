@@ -1,3 +1,10 @@
 test
 build*
 .env
+*.pyc
+__pycache__
+*.aux
+*.log
+*.out
+*.fls
+*.fdb_latexmk

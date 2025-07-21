@@ -106,7 +106,7 @@ class Diff2Latex(BaseModel):
                 new_lineno += 1
         return paired
 
-    def parse_diff_lines(self) -> List[Line]:
+    def parse_diff_lines(self) -> "Diff2Latex":
         line_nr = 1
         hunk = []
         
@@ -133,4 +133,11 @@ class Diff2Latex(BaseModel):
         if hunk:
             self._lines.extend(self._flush_hunk(hunk))
 
-        return self._lines
+        return self
+    
+    def to_latex(self) -> str:
+        """
+        Convert the parsed lines to LaTeX format.
+        """
+        latex_lines = [line.to_latex() for line in self._lines]
+        return "\n".join(latex_lines)

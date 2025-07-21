@@ -17,7 +17,7 @@ class Cell(BaseModel):
         Convert the cell content to LaTeX format.
         """
         if self.color:
-            return f"\\cellcolor{{{self.color}}}{self.line_nr} & " + "".join(
+            return f"\\cellcolor{{{self.color}}}{self.line_nr} & \\cellcolor{{{self.color}}}" + "".join(
                 f"{code.to_latex()}" for code in self.content
             )
         return f"{self.line_nr} & " + "".join(f"{code.to_latex()}" for code in self.content)
