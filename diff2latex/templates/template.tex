@@ -26,7 +26,13 @@
 }
 
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
-\newcommand{\code}[1]{\jbm\selectfont\myfontsize\texttt{#1}}
+\newcommand{\code}[2]{%
+  \begingroup%
+    \definecolor{customcodecolor}{HTML}{\detokenize{#1}}%
+    \jbm\selectfont\myfontsize\texttt{\color{customcodecolor}#2}%
+  \endgroup%
+}
+
 
 \begin{document}
 \begin{tabularx}{\linewidth}{r Y r Y}
