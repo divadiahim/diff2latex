@@ -25,11 +25,12 @@ class Cell(BaseModel):
 
         for code_block in self.content:
             new_code_block = [next(it) for _ in code_block.content] if self.colormap.root else []
+            # print(f"Rebuilding content for cell with line number {self.line_nr}: {new_code_block}")
             new_content.append(
                 CodeBlock(
                     content=code_block.content,
                     color=code_block.color,
-                    txtcolormap=ColorMap(root=new_code_block),
+                    colormap=ColorMap(root=new_code_block),
                 )
             )
         self.content = new_content    

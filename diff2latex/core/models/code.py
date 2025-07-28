@@ -1,4 +1,6 @@
 from pydantic import BaseModel, Field
+from itertools import groupby
+from operator import itemgetter
 from ..utils import ColorMap
 
 
@@ -35,7 +37,14 @@ class CodeBlock(BaseModel):
         Convert the code block to its LaTeX representation.
         """
         if self.colormap:
-            print (f"CodeBlock: {self.txtcolormap}")
+            latex_content = []
+            groups = [list(g) for k, g in groupby(self.colormap.root, key=itemgetter(1))]
+            for group in groups:
+                content = "".join(char for char, _ in group)
+                color = group[0][1]
+                latex_content.append(f"\\code{{{color.strip('#')}}}{{{self._sanitize(content)}}}")
+            return "".join(latex_content)
+                
         
         if self.color:
             return f"\\boxx{{{self.color}}}{{{self._sanitize(self.content)}}}"

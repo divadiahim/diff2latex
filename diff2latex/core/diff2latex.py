@@ -1,20 +1,14 @@
 from pydantic import BaseModel, Field, PrivateAttr
 from typing import List, Tuple, TextIO
 from .models import Line, Cell, CodeBlock
-from .utils import CharColorizer, ColorMap
+from .utils import CharColorizer
 from difflib import SequenceMatcher
 import re
 
 
 class Diff2Latex(BaseModel):
-    highlight: bool = Field(
-        False, description="Whether to highlight the lines in the diff."
-    )
-
     _parsed_lines: List[Line] = PrivateAttr(default_factory=list)
-    _colorizer: CharColorizer | None = PrivateAttr(
-        default_factory=lambda: CharColorizer(style_name="monokai")
-    )
+    colorizer: CharColorizer
 
     @staticmethod
     def _clean_diff_file(lines: List[str]) -> List[str]:
@@ -23,14 +17,7 @@ class Diff2Latex(BaseModel):
     @staticmethod
     def _tokenize(line: str) -> List[str]:
         return re.findall(r"\s+|\w+|[^\w\s]", line)
-    
-    def _get_colormap(self, content: str) -> ColorMap:
-        """
-        Obtain the color map for the cell.
-        """
-        if not self._colorizer:
-            raise ValueError("Colorizer is not initialized.")
-        return self._colorizer.get_colormap(content)
+
 
     def _inline_diff(self, old_line: str, new_line: str) -> Tuple[List[CodeBlock], List[CodeBlock]]:
         old_tokens = self._tokenize(old_line)
@@ -121,8 +108,8 @@ class Diff2Latex(BaseModel):
 
                 self._parsed_lines.append(Line(
                     content=(
-                        Cell(content=[CodeBlock(content=content)], line_nr=line_nr, colormap=self._colorizer.get_colormap(content)),
-                        Cell(content=[CodeBlock(content=content)], line_nr=line_nr, colormap=self._colorizer.get_colormap(content))
+                        Cell(content=[CodeBlock(content=content)], line_nr=line_nr, colormap=self.colorizer.get_colormap(content)),
+                        Cell(content=[CodeBlock(content=content)], line_nr=line_nr, colormap=self.colorizer.get_colormap(content))
                     ),
                     highlight=self.highlight
                 ))
