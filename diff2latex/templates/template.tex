@@ -1,0 +1,48 @@
+\documentclass{article}
+\usepackage[table]{xcolor}
+\usepackage{tabularx}
+\usepackage[margin=1in]{geometry}
+\usepackage{courier}
+\usepackage{fvextra} % Better minted inside tables
+\usepackage{comment}
+\usepackage{listings}
+\usepackage{ltablex}
+\usepackage{fontspec}
+\usepackage{luacolor}
+\usepackage{lua-ul}
+\keepXColumns
+
+\newfontface\jbm{$font}[Contextuals={WordInitial,WordFinal}]
+
+\newcommand{\myfontsize}{\fontsize{$fontsize}{12pt}\selectfont}
+
+\definecolor{addgreen}{RGB}{220,255,220}
+\definecolor{remred}{RGB}{255,220,220}
+\definecolor{diffchargreen}{RGB}{180,250,180} % inline change
+\definecolor{diffcharred}{RGB}{250,180,180} % inline change
+
+\newcommand{\boxx}[3]{%
+  \begingroup%
+    \definecolor{customboxcolor}{HTML}{\detokenize{#1}}%
+    \jbm\selectfont\myfontsize\highLight[#2]{\texttt{\color{customboxcolor}#3}}%
+  \endgroup%
+}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcommand{\code}[2]{%
+  \begingroup%
+    \definecolor{customcodecolor}{HTML}{\detokenize{#1}}%
+    \jbm\selectfont\myfontsize\texttt{\color{customcodecolor}#2}%
+  \endgroup%
+}
+
+
+\begin{document}
+\begin{tabularx}{\linewidth}{r Y r Y}
+\multicolumn{1}{c}{\textbf{\#}} & \multicolumn{1}{c}{\textbf{Old Code}} &
+\multicolumn{1}{c}{\textbf{\#}} & \multicolumn{1}{c}{\textbf{New Code}} \\
+\hline
+$content
+\hline
+\end{tabularx}
+\end{document}
