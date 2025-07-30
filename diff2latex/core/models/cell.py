@@ -1,7 +1,7 @@
-from pydantic import BaseModel, Field, model_validator
-from typing import List, Any
+from pydantic import BaseModel, Field, PrivateAttr
+from typing import List
 from . import CodeBlock
-from ..utils import ColorMap, CharColorizer
+from ..utils import ColorMap
 
 
 class Cell(BaseModel):
@@ -11,40 +11,46 @@ class Cell(BaseModel):
 
     content: List[CodeBlock] = Field(..., description="The content of the cell.")
     line_nr: int | None = Field(..., description="Line number in the diff.")
-    color: str | None = Field(None, description="Color of the cell, if applicable.")
-    colormap: ColorMap | None = Field(
-        None, description="The color map for the text in the code block."
-    )
+    bg_color: str | None = Field(None, description="Color of the cell, if applicable.")
+    _colormap: ColorMap | None = PrivateAttr(default=None)
 
-    def _rebuild_colorized_content(self) -> None:
+    def attach_colormap(self, colormap: ColorMap) -> "Cell":
         """
-        Rebuild the content of the cell with colorized code blocks.
+        Create a new Cell with colorized code blocks using the provided colormap.
         """
-        it = iter(self.colormap.root)
+        if not colormap or not colormap.root:
+            return self
+
+        it = iter(colormap.root)
         new_content = []
 
         for code_block in self.content:
-            new_code_block = [next(it) for _ in code_block.content] if self.colormap.root else []
-            # print(f"Rebuilding content for cell with line number {self.line_nr}: {new_code_block}")
+            new_code_block = (
+                [next(it) for _ in code_block.content] if code_block.content else []
+            )
+
             new_content.append(
                 CodeBlock(
                     content=code_block.content,
-                    color=code_block.color,
+                    bg_color=code_block.bg_color,
                     colormap=ColorMap(root=new_code_block),
                 )
             )
-        self.content = new_content    
 
-    def to_latex(self, highlight: bool = False) -> str:
+        return Cell(
+            content=new_content,
+            line_nr=self.line_nr,
+            bg_color=self.bg_color,
+            _colormap=colormap,
+        )
+
+    def to_latex(self) -> str:
         """
         Convert the cell content to LaTeX format.
         """
-        if self.colormap:
-            self._rebuild_colorized_content()
-
-        if self.color:
+        if self.bg_color:
             return (
-                f"\\cellcolor{{{self.color}}}{self.line_nr} & \\cellcolor{{{self.color}}}"
+                f"\\cellcolor{{{self.bg_color}}}{self.line_nr} & \\cellcolor{{{self.bg_color}}}"
                 + "".join(f"{code.to_latex()}" for code in self.content)
             )
         return f"{self.line_nr} & " + "".join(

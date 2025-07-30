@@ -43,6 +43,7 @@ def convert(ctx, diff_file_path: click.File, output_file: click.File) -> None:
         content=lines,
     )
     output_file.write(template)
+    
 
 
 def main():

@@ -10,7 +10,7 @@ class CodeBlock(BaseModel):
     """
 
     content: str = Field(..., description="The content of the code block.")
-    color: str | None = Field(
+    bg_color: str | None = Field(
         None, description="The color of the box around the code block."
     )
     colormap: ColorMap | None = Field(
@@ -38,14 +38,20 @@ class CodeBlock(BaseModel):
         """
         if self.colormap:
             latex_content = []
-            groups = [list(g) for k, g in groupby(self.colormap.root, key=itemgetter(1))]
+            groups = [
+                list(g) for k, g in groupby(self.colormap.root, key=itemgetter(1))
+            ]
+
             for group in groups:
                 content = "".join(char for char, _ in group)
                 color = group[0][1]
-                latex_content.append(f"\\code{{{color.strip('#')}}}{{{self._sanitize(content)}}}")
+                latex_content.append(
+                    f"\\code{{{color}}}{{{self._sanitize(content)}}}"
+                    if not self.bg_color
+                    else f"\\boxx{{{color}}}{{{self.bg_color}}}{{{self._sanitize(content)}}}"
+                )
             return "".join(latex_content)
-                
-        
-        if self.color:
-            return f"\\boxx{{{self.color}}}{{{self._sanitize(self.content)}}}"
-        return f"\\code{{{'FF5733'}}}{{{self._sanitize(self.content)}}}"
+
+        if self.bg_color:
+            return f"\\boxx{{{'000000'}}}{{{self.bg_color}}}{{{self._sanitize(self.content)}}}"
+        return f"\\code{{{'000000'}}}{{{self._sanitize(self.content)}}}"

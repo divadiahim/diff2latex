@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, PrivateAttr
+from pydantic import BaseModel, PrivateAttr
 from typing import List, Tuple, TextIO
 from .models import Line, Cell, CodeBlock
 from .utils import CharColorizer
@@ -36,13 +36,13 @@ class Diff2Latex(BaseModel):
                 new_chunks.append(CodeBlock(content=old_part))
             elif tag == "replace":
                 if old_part:
-                    old_chunks.append(CodeBlock(content=old_part, color="diffcharred"))
+                    old_chunks.append(CodeBlock(content=old_part, bg_color="diffcharred"))
                 if new_part:
-                    new_chunks.append(CodeBlock(content=new_part, color="diffchargreen"))
+                    new_chunks.append(CodeBlock(content=new_part, bg_color="diffchargreen"))
             elif tag == "delete":
-                old_chunks.append(CodeBlock(content=old_part, color="diffcharred"))
+                old_chunks.append(CodeBlock(content=old_part, bg_color="diffcharred"))
             elif tag == "insert":
-                new_chunks.append(CodeBlock(content=new_part, color="diffchargreen"))
+                new_chunks.append(CodeBlock(content=new_part, bg_color="diffchargreen"))
 
         return old_chunks, new_chunks
 
@@ -58,34 +58,34 @@ class Diff2Latex(BaseModel):
         for i in range(max_len):
             old_line = deletions[i] if i < len(deletions) else ""
             new_line = additions[i] if i < len(additions) else ""
+            
+            old_line_colormap = self.colorizer.get_colormap(old_line)
+            new_line_colormap = self.colorizer.get_colormap(new_line)
 
             if old_line and new_line:
                 old_diff, new_diff = self._inline_diff(old_line, new_line)
                 lines.append(Line(
                     content=(
-                        Cell(content=old_diff, line_nr=old_lineno, color="remred"),
-                        Cell(content=new_diff, line_nr=new_lineno, color="addgreen")
+                        Cell(content=old_diff, line_nr=old_lineno, bg_color="remred").attach_colormap(old_line_colormap),
+                        Cell(content=new_diff, line_nr=new_lineno, bg_color="addgreen").attach_colormap(new_line_colormap)
                     ),
-                    highlight=self.highlight
                 ))
                 old_lineno += 1
                 new_lineno += 1
             elif old_line:
                 lines.append(Line(
                     content=(
-                        Cell(content=[CodeBlock(content=old_line)], line_nr=old_lineno),
+                        Cell(content=[CodeBlock(content=old_line)], line_nr=old_lineno).attach_colormap(old_line_colormap),
                         Cell(content=[], line_nr=None)
                     ),
-                    highlight=self.highlight
                 ))
                 old_lineno += 1
             elif new_line:
                 lines.append(Line(
                     content=(
                         Cell(content=[], line_nr=None),
-                        Cell(content=[CodeBlock(content=new_line)], line_nr=new_lineno)
+                        Cell(content=[CodeBlock(content=new_line)], line_nr=new_lineno).attach_colormap(new_line_colormap)
                     ),
-                    highlight=self.highlight
                 ))
                 new_lineno += 1
 
@@ -104,14 +104,14 @@ class Diff2Latex(BaseModel):
                     self._parsed_lines.extend(self._process_hunk(hunk, line_nr))
                     hunk = []
 
-                content = line[1:].rstrip() if line.startswith(" ") else line.rstrip()
+                line = line[1:].rstrip() if line.startswith(" ") else line.rstrip()
+                line_colormap = self.colorizer.get_colormap(line)
 
                 self._parsed_lines.append(Line(
                     content=(
-                        Cell(content=[CodeBlock(content=content)], line_nr=line_nr, colormap=self.colorizer.get_colormap(content)),
-                        Cell(content=[CodeBlock(content=content)], line_nr=line_nr, colormap=self.colorizer.get_colormap(content))
+                        Cell(content=[CodeBlock(content=line)], line_nr=line_nr).attach_colormap(line_colormap),    
+                        Cell(content=[CodeBlock(content=line)], line_nr=line_nr).attach_colormap(line_colormap)
                     ),
-                    highlight=self.highlight
                 ))
                 line_nr += 1
 

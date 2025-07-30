@@ -32,10 +32,10 @@ class CharColorizer(BaseModel):
         if style is None:
             return None
         token_colors = self._get_token_colors(style)
-        char_colors: List[Tuple[str, str]] = []
+        char_colors = []
         for ttype, value in lex(code, PythonLexer()):
             color = self._resolve_color(ttype, token_colors)
             for char in value:
                 if char != '\n':
-                    char_colors.append((char, color))
+                    char_colors.append((char, color[color.find('#'):].strip("#"))) # Temp solution to remove the text attibutes
         return ColorMap(root=char_colors)

@@ -13,7 +13,7 @@ SRC_DIR = src
 build:
 	@mkdir -p $(LATEX_O_DIR) $(PDF_O_DIR)
 	@echo "Building for language: $(LANGUAGE) with diff file: $(DIFF_FILE)"
-	$(PYC) -m diff2latex --highlight="monokai" convert $(DIFF_FILE) $(LATEX_O_DIR)/diff2latex.tex
+	$(PYC) -m diff2latex --highlight="solarized-light" convert $(DIFF_FILE) $(LATEX_O_DIR)/diff2latex.tex
 
 build-pdf:
 	@echo "Compiling LaTeX to PDF..."

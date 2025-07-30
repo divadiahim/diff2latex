@@ -21,8 +21,11 @@
 \definecolor{diffchargreen}{RGB}{180,250,180} % inline change
 \definecolor{diffcharred}{RGB}{250,180,180} % inline change
 
-\newcommand{\boxx}[2]{%
-    \jbm\selectfont\myfontsize\highLight[#1]{\texttt{#2}}%
+\newcommand{\boxx}[3]{%
+  \begingroup%
+    \definecolor{customboxcolor}{HTML}{\detokenize{#1}}%
+    \jbm\selectfont\myfontsize\highLight[#2]{\texttt{\color{customboxcolor}#3}}%
+  \endgroup%
 }
 
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
