@@ -1,5 +1,4 @@
 from pydantic import BaseModel, Field, PrivateAttr
-from typing import List
 from . import CodeBlock
 from ..utils import ColorMap
 
@@ -9,12 +8,12 @@ class Cell(BaseModel):
     Base class for all cells in the diff2latex table.
     """
 
-    content: List[CodeBlock] = Field(..., description="The content of the cell.")
+    content: list[CodeBlock] = Field(..., description="The content of the cell.")
     line_nr: int | None = Field(..., description="Line number in the diff.")
-    bg_color: str | None = Field(None, description="Color of the cell, if applicable.")
+    bg_color: str | None = Field(default=None, description="Color of the cell, if applicable.")
     _colormap: ColorMap | None = PrivateAttr(default=None)
 
-    def attach_colormap(self, colormap: ColorMap) -> "Cell":
+    def attach_colormap(self, colormap: ColorMap | None) -> "Cell":
         """
         Create a new Cell with colorized code blocks using the provided colormap.
         """
@@ -22,7 +21,7 @@ class Cell(BaseModel):
             return self
 
         it = iter(colormap.root)
-        new_content = []
+        new_content: list[CodeBlock] = []
 
         for code_block in self.content:
             new_code_block = (
@@ -37,12 +36,13 @@ class Cell(BaseModel):
                 )
             )
 
-        return Cell(
+        c = Cell(
             content=new_content,
             line_nr=self.line_nr,
             bg_color=self.bg_color,
-            _colormap=colormap,
         )
+        c._colormap = colormap
+        return c
 
     def to_latex(self) -> str:
         """

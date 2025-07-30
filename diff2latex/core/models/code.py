@@ -11,10 +11,10 @@ class CodeBlock(BaseModel):
 
     content: str = Field(..., description="The content of the code block.")
     bg_color: str | None = Field(
-        None, description="The color of the box around the code block."
+        default=None, description="The color of the box around the code block."
     )
     colormap: ColorMap | None = Field(
-        None, description="The color map for the text in the code block."
+        default=None, description="The color map for the text in the code block."
     )
 
     def _sanitize(self, s: str) -> str:
@@ -37,10 +37,10 @@ class CodeBlock(BaseModel):
         Convert the code block to its LaTeX representation.
         """
         if self.colormap:
-            latex_content = []
-            groups = [
-                list(g) for k, g in groupby(self.colormap.root, key=itemgetter(1))
-            ]
+            latex_content: list[str] = []
+            groups = [ # itemgetter is crazy
+                list(g) for _, g in groupby(self.colormap.root, key=itemgetter(1)) # pyright:ignore[reportAny]
+            ]   
 
             for group in groups:
                 content = "".join(char for char, _ in group)
