@@ -1,0 +1,98 @@
+\documentclass{article}
+\usepackage[table]{xcolor}
+\usepackage{tabularx}
+\usepackage[margin=1in]{geometry}
+\usepackage{courier}
+\usepackage{fvextra} % Better minted inside tables
+\usepackage{comment}
+\usepackage{listings}
+\usepackage{ltablex}
+\usepackage{fontspec}
+\usepackage{luacolor}
+\usepackage{lua-ul}
+\keepXColumns
+
+\newfontface\jbm{Fira Code}[Contextuals={WordInitial,WordFinal}]
+
+\newcommand{\myfontsize}{\fontsize{10pt}{12pt}\selectfont}
+
+\definecolor{addgreen}{RGB}{220,255,220}
+\definecolor{remred}{RGB}{255,220,220}
+\definecolor{diffchargreen}{RGB}{180,250,180} % inline change
+\definecolor{diffcharred}{RGB}{250,180,180} % inline change
+
+\newcommand{\boxx}[3]{%
+  \begingroup%
+    \definecolor{customboxcolor}{HTML}{\detokenize{#1}}%
+    \jbm\selectfont\myfontsize\highLight[#2]{\texttt{\color{customboxcolor}#3}}%
+  \endgroup%
+}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcommand{\code}[2]{%
+  \begingroup%
+    \definecolor{customcodecolor}{HTML}{\detokenize{#1}}%
+    \jbm\selectfont\myfontsize\texttt{\color{customcodecolor}#2}%
+  \endgroup%
+}
+
+
+\begin{document}
+\begin{tabularx}{\linewidth}{r Y r Y}
+\multicolumn{1}{c}{\textbf{\#}} & \multicolumn{1}{c}{\textbf{Old Code}} &
+\multicolumn{1}{c}{\textbf{\#}} & \multicolumn{1}{c}{\textbf{New Code}} \\
+\hline
+\cellcolor{remred}1 & \cellcolor{remred}\code{000000}{\#\ Keywords\ \&\ syntax\ demo\ (}\boxx{000000}{diffcharred}{A}\code{000000}{)} & \cellcolor{addgreen}1 & \cellcolor{addgreen}\code{000000}{\#\ Keywords\ \&\ syntax\ demo\ (}\boxx{000000}{diffchargreen}{B}\code{000000}{)} \\
+1 & \code{000000}{} & 1 & \code{000000}{} \\
+2 & \code{000000}{import}\code{bbbbbb}{\ }\code{0000FF}{math} & 2 & \code{000000}{import}\code{bbbbbb}{\ }\code{0000FF}{math} \\
+3 & \code{000000}{from}\code{bbbbbb}{\ }\code{0000FF}{math}\code{bbbbbb}{\ }\code{000000}{import\ pi\ }\code{008000}{as}\code{000000}{\ circle\_pi} & 3 & \code{000000}{from}\code{bbbbbb}{\ }\code{0000FF}{math}\code{bbbbbb}{\ }\code{000000}{import\ pi\ }\code{008000}{as}\code{000000}{\ circle\_pi} \\
+4 & \code{000000}{} & 4 & \code{000000}{} \\
+5 & \code{008000}{class}\code{bbbbbb}{\ }\code{0000FF}{Example}\code{000000}{:} & 5 & \code{008000}{class}\code{bbbbbb}{\ }\code{0000FF}{Example}\code{000000}{:} \\
+\cellcolor{remred}6 & \cellcolor{remred}\code{000000}{\ \ \ \ }\code{008000}{def}\code{bbbbbb}{\ }\code{000000}{\_\_init\_\_(self,\ value:\ }\code{008000}{int}\code{000000}{\ }\code{666666}{=}\code{000000}{\ }\boxx{000000}{diffcharred}{0}\code{000000}{)\ }\code{666666}{->}\code{000000}{\ None:} & \cellcolor{addgreen}6 & \cellcolor{addgreen}\code{000000}{\ \ \ \ }\code{008000}{def}\code{bbbbbb}{\ }\code{000000}{\_\_init\_\_(self,\ value:\ }\code{008000}{int}\code{000000}{\ }\code{666666}{=}\code{000000}{\ }\boxx{000000}{diffchargreen}{1}\code{000000}{)\ }\code{666666}{->}\code{000000}{\ None:}\boxx{000000}{diffchargreen}{\ \ \#\ Changed\ default\ from\ 0\ to\ 1} \\
+6 & \code{000000}{\ \ \ \ \ \ \ \ self}\code{666666}{.}\code{000000}{value\ }\code{666666}{=}\code{000000}{\ value} & 6 & \code{000000}{\ \ \ \ \ \ \ \ self}\code{666666}{.}\code{000000}{value\ }\code{666666}{=}\code{000000}{\ value} \\
+7 & \code{000000}{} & 7 & \code{000000}{} \\
+8 & \code{000000}{\ \ \ \ }\code{008000}{def}\code{bbbbbb}{\ }\code{0000FF}{compute}\code{000000}{(self)\ }\code{666666}{->}\code{000000}{\ }\code{008000}{float}\code{000000}{:} & 8 & \code{000000}{\ \ \ \ }\code{008000}{def}\code{bbbbbb}{\ }\code{0000FF}{compute}\code{000000}{(self)\ }\code{666666}{->}\code{000000}{\ }\code{008000}{float}\code{000000}{:} \\
+\cellcolor{remred}9 & \cellcolor{remred}\code{000000}{\ \ \ \ \ \ \ \ }\code{008000}{if}\code{000000}{\ self}\code{666666}{.}\code{000000}{value\ }\code{666666}{>}\code{000000}{\ 0:} & \cellcolor{addgreen}9 & \cellcolor{addgreen}\code{000000}{\ \ \ \ \ \ \ \ }\code{008000}{if}\code{000000}{\ self}\code{666666}{.}\code{000000}{value\ }\code{666666}{>}\boxx{666666}{diffchargreen}{=}\code{000000}{\ 0:}\boxx{000000}{diffchargreen}{\ \ \#\ Changed\ >\ to\ >=} \\
+9 & \code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{for}\code{000000}{\ i\ }\code{AA22FF}{in}\code{000000}{\ }\code{008000}{range}\code{000000}{(1,\ 10):} & 9 & \code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{for}\code{000000}{\ i\ }\code{AA22FF}{in}\code{000000}{\ }\code{008000}{range}\code{000000}{(1,\ 10):} \\
+\cellcolor{remred}10 & \cellcolor{remred}\code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{while}\code{000000}{\ i\ }\code{666666}{<}\code{000000}{\ }\code{000000}{5}\boxx{000000}{diffcharred}{:} & \cellcolor{addgreen}10 & \cellcolor{addgreen}\code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{while}\code{000000}{\ i\ }\code{666666}{<}\code{000000}{\ }\boxx{000000}{diffchargreen}{6:\ \ \#\ Changed\ }\code{000000}{5}\boxx{000000}{diffchargreen}{\ to\ 6} \\
+10 & \code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{try}\code{000000}{:} & 10 & \code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{try}\code{000000}{:} \\
+\cellcolor{remred}11 & \cellcolor{remred}\code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{assert}\code{000000}{\ i\ }\code{666666}{!=}\code{000000}{\ }\boxx{000000}{diffcharred}{3}\code{000000}{,\ "Unlucky\ number"} & \cellcolor{addgreen}11 & \cellcolor{addgreen}\code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{assert}\code{000000}{\ i\ }\code{666666}{!=}\code{000000}{\ }\boxx{000000}{diffchargreen}{4}\code{000000}{,\ "Unlucky\ number"}\boxx{000000}{diffchargreen}{\ \ \#\ Changed\ 3\ to\ 4} \\
+11 & \code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{yield}\code{000000}{\ i} & 11 & \code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{yield}\code{000000}{\ i} \\
+12 & \code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{break} & 12 & \code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{break} \\
+13 & \code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{except}\code{000000}{\ }\code{CB3F38}{AssertionError}\code{000000}{\ }\code{008000}{as}\code{000000}{\ e:} & 13 & \code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{except}\code{000000}{\ }\code{CB3F38}{AssertionError}\code{000000}{\ }\code{008000}{as}\code{000000}{\ e:} \\
+\cellcolor{remred}14 & \cellcolor{remred}\code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{print}\code{000000}{(f"}\boxx{000000}{diffcharred}{Caught}\code{000000}{:\ }\code{A45A77}{\{}\code{000000}{e}\code{A45A77}{\}}\code{000000}{")} & \cellcolor{addgreen}14 & \cellcolor{addgreen}\code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{print}\code{000000}{(f"}\boxx{000000}{diffchargreen}{Error}\code{000000}{:\ }\code{A45A77}{\{}\code{000000}{e}\code{A45A77}{\}}\code{000000}{")}\boxx{000000}{diffchargreen}{\ \ \#\ Changed\ message} \\
+14 & \code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{continue} & 14 & \code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{continue} \\
+15 & \code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{finally}\code{000000}{:} & 15 & \code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{finally}\code{000000}{:} \\
+16 & \code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{pass} & 16 & \code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{pass} \\
+\cellcolor{remred}17 & \cellcolor{remred}\code{000000}{\ \ \ \ \ \ \ \ }\code{008000}{elif}\code{000000}{\ self}\code{666666}{.}\code{000000}{value\ }\code{666666}{==}\code{000000}{\ }\code{000000}{0}\boxx{000000}{diffcharred}{:} & \cellcolor{addgreen}17 & \cellcolor{addgreen}\code{000000}{\ \ \ \ \ \ \ \ }\code{008000}{elif}\code{000000}{\ self}\code{666666}{.}\code{000000}{value\ }\code{666666}{==}\code{000000}{\ }\boxx{666666}{diffchargreen}{-}\boxx{000000}{diffchargreen}{1:\ \ \#\ Changed\ }\code{000000}{0}\boxx{000000}{diffchargreen}{\ to\ -1} \\
+17 & \code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{return}\code{000000}{\ None} & 17 & \code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{return}\code{000000}{\ None} \\
+18 & \code{000000}{\ \ \ \ \ \ \ \ }\code{008000}{else}\code{000000}{:} & 18 & \code{000000}{\ \ \ \ \ \ \ \ }\code{008000}{else}\code{000000}{:} \\
+\cellcolor{remred}19 & \cellcolor{remred}\code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{raise}\code{000000}{\ }\code{CB3F38}{ValueError}\code{000000}{("}\boxx{000000}{diffcharred}{Negative}\code{000000}{!")} & \cellcolor{addgreen}19 & \cellcolor{addgreen}\code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{raise}\code{000000}{\ }\code{CB3F38}{ValueError}\code{000000}{("}\boxx{000000}{diffchargreen}{Too\ negative}\code{000000}{!")}\boxx{000000}{diffchargreen}{\ \ \#\ Changed\ error\ message\ and\ a\ liot\ of\ other\ things\ and\ many\ more\ sthings\ and\ erhlghs\ eskjrhg\ ewg\ ewkh\ lk4w5ypow45klthq3\ k45hkjlw\ hkj54wnt\ 3q5t\ 5iuyg4wiu\ hq5k4nt\ kjl35wht\ jgwhj\ we\ hjl\ ghwergewrjgh\ erwjgh\ ewrkjgh\ erwkljgh\ ewrrg\ ewrgj\ herwg\ erwrgh\ ewjrgh\ ewrjgh\ werjlgjj\ hwerkljgh\ wergj\ hewrkjgh\ wergh\ wergh\ \ ewrkjlgherw\ gerwkjlhgkl\ wergkjlw\ ewrjgh\ wergh\ werkjgh\ kj\ jkerhgj\ wegr} \\
+19 & \code{000000}{} & 19 & \code{000000}{} \\
+20 & \code{008000}{def}\code{bbbbbb}{\ }\code{0000FF}{main}\code{000000}{():} & 20 & \code{008000}{def}\code{bbbbbb}{\ }\code{0000FF}{main}\code{000000}{():} \\
+\cellcolor{remred}21 & \cellcolor{remred}\code{000000}{\ \ \ \ }\boxx{000000}{diffcharred}{e}\code{000000}{\ }\boxx{666666}{diffcharred}{=}\boxx{000000}{diffcharred}{\ Example(2)} & \cellcolor{addgreen}21 & \cellcolor{addgreen}\code{000000}{\ \ \ \ }\boxx{008000}{diffchargreen}{if}\code{000000}{\ }\boxx{000000}{diffchargreen}{a:} \\
+22 & \code{000000}{\ \ \ \ result\ }\code{666666}{=}\code{000000}{\ [x\ }\code{008000}{for}\code{000000}{\ x\ }\code{AA22FF}{in}\code{000000}{\ e}\code{666666}{.}\code{000000}{compute()\ }\code{008000}{if}\code{000000}{\ x\ }\code{666666}{\%}\code{000000}{\ 2\ }\code{666666}{==}\code{000000}{\ 0]} & None &  \\
+23 & \code{000000}{\ \ \ \ }\code{008000}{print}\code{000000}{("Results:",\ result)} & None &  \\
+21 & \code{000000}{\ \ \ \ }\code{008000}{match}\code{000000}{\ e}\code{666666}{.}\code{000000}{value:} & 21 & \code{000000}{\ \ \ \ }\code{008000}{match}\code{000000}{\ e}\code{666666}{.}\code{000000}{value:} \\
+22 & \code{000000}{\ \ \ \ \ \ \ \ }\code{008000}{case}\code{000000}{\ 0:} & 22 & \code{000000}{\ \ \ \ \ \ \ \ }\code{008000}{case}\code{000000}{\ 0:} \\
+23 & \code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{print}\code{000000}{("Zero")} & 23 & \code{000000}{\ \ \ \ \ \ \ \ \ \ \ \ }\code{008000}{print}\code{000000}{("Zero")} \\
+24 & \code{000000}{\ \ \ \ }\code{008000}{def}\code{bbbbbb}{\ }\code{0000FF}{inner}\code{000000}{(}\code{666666}{*}\code{000000}{args,\ }\code{666666}{**}\code{000000}{kwargs):} & 24 & \code{000000}{\ \ \ \ }\code{008000}{def}\code{bbbbbb}{\ }\code{0000FF}{inner}\code{000000}{(}\code{666666}{*}\code{000000}{args,\ }\code{666666}{**}\code{000000}{kwargs):} \\
+25 & \code{000000}{\ \ \ \ \ \ \ \ }\code{008000}{global}\code{000000}{\ x} & 25 & \code{000000}{\ \ \ \ \ \ \ \ }\code{008000}{global}\code{000000}{\ x} \\
+26 & \code{000000}{\ \ \ \ \ \ \ \ }\code{008000}{nonlocal}\code{000000}{\ result} & 26 & \code{000000}{\ \ \ \ \ \ \ \ }\code{008000}{nonlocal}\code{000000}{\ result} \\
+\cellcolor{remred}27 & \cellcolor{remred}\code{000000}{\ \ \ \ \ \ \ \ x\ }\code{666666}{=}\code{000000}{\ }\code{008000}{lambda}\code{000000}{\ y:\ y\ }\boxx{666666}{diffcharred}{**}\code{000000}{\ }\boxx{000000}{diffcharred}{2} & \cellcolor{addgreen}27 & \cellcolor{addgreen}\code{000000}{\ \ \ \ \ \ \ \ x\ }\code{666666}{=}\code{000000}{\ }\code{008000}{lambda}\code{000000}{\ y:\ y\ }\boxx{666666}{diffchargreen}{+}\code{000000}{\ }\boxx{000000}{diffchargreen}{1\ \ \#\ Changed\ expression} \\
+\cellcolor{remred}28 & \cellcolor{remred}\code{000000}{\ \ \ \ \ \ \ \ }\code{008000}{print}\code{000000}{(\{k:\ v}\code{000000}{\ }\code{008000}{for}\code{000000}{\ k,\ v\ }\code{AA22FF}{in}\code{000000}{\ kwargs}\code{666666}{.}\code{000000}{items()\})} & \cellcolor{addgreen}28 & \cellcolor{addgreen}\code{000000}{\ \ \ \ \ \ \ \ }\code{008000}{print}\code{000000}{(\{k:\ v}\boxx{666666}{diffchargreen}{.}\boxx{000000}{diffchargreen}{upper()}\code{000000}{\ }\code{008000}{for}\code{000000}{\ k,\ v\ }\code{AA22FF}{in}\code{000000}{\ kwargs}\code{666666}{.}\code{000000}{items()\})}\boxx{000000}{diffchargreen}{\ \ \#\ Added\ .upper()} \\
+27 & \code{000000}{\ \ \ \ \ \ \ \ }\code{008000}{return}\code{000000}{\ x(args[0])\ }\code{008000}{if}\code{000000}{\ args\ }\code{008000}{else}\code{000000}{\ None} & 27 & \code{000000}{\ \ \ \ \ \ \ \ }\code{008000}{return}\code{000000}{\ x(args[0])\ }\code{008000}{if}\code{000000}{\ args\ }\code{008000}{else}\code{000000}{\ None} \\
+28 & \code{000000}{} & 28 & \code{000000}{} \\
+\cellcolor{remred}29 & \cellcolor{remred}\code{000000}{\ \ \ \ }\code{008000}{print}\code{000000}{(inner(}\boxx{000000}{diffcharred}{4}\code{000000}{,\ key}\code{666666}{=}\code{000000}{'val'))} & \cellcolor{addgreen}29 & \cellcolor{addgreen}\code{000000}{\ \ \ \ }\code{008000}{print}\code{000000}{(inner(}\boxx{000000}{diffchargreen}{3}\code{000000}{,\ key}\code{666666}{=}\code{000000}{'val'))}\boxx{000000}{diffchargreen}{\ \ \#\ Changed\ arg} \\
+29 & \code{000000}{} & 29 & \code{000000}{} \\
+30 & \code{008000}{if}\code{000000}{\ \_\_name\_\_\ }\code{666666}{==}\code{000000}{\ "\_\_main\_\_":} & 30 & \code{008000}{if}\code{000000}{\ \_\_name\_\_\ }\code{666666}{==}\code{000000}{\ "\_\_main\_\_":} \\
+31 & \code{000000}{\ \ \ \ main()} & 31 & \code{000000}{\ \ \ \ main()} \\
+32 & \code{000000}{} & 32 & \code{000000}{} \\
+33 & \code{000000}{} & 33 & \code{000000}{} \\
+\cellcolor{remred}34 & \cellcolor{remred}\code{000000}{\ \ \ \ \ \ \ \ old\_part\ }\code{666666}{=}\code{000000}{\ }\code{000000}{sanitize(}\boxx{000000}{diffcharred}{old\_line}\code{000000}{[i1:i2])} & \cellcolor{addgreen}34 & \cellcolor{addgreen}\code{000000}{\ \ \ \ \ \ \ \ old\_part\ }\code{666666}{=}\code{000000}{\ }\boxx{000000}{diffchargreen}{"\ "}\boxx{666666}{diffchargreen}{.}\boxx{000000}{diffchargreen}{join(}\code{000000}{sanitize(}\boxx{000000}{diffchargreen}{tok)\ }\boxx{008000}{diffchargreen}{for}\boxx{000000}{diffchargreen}{\ tok\ }\boxx{AA22FF}{diffchargreen}{in}\boxx{000000}{diffchargreen}{\ old\_tokens}\code{000000}{[i1:i2])} \\
+\cellcolor{remred}35 & \cellcolor{remred}\code{000000}{\ \ \ \ \ \ \ \ new\_part\ }\code{666666}{=}\code{000000}{\ }\code{000000}{sanitize(}\boxx{000000}{diffcharred}{new\_line}\code{000000}{[j1:j2])} & \cellcolor{addgreen}35 & \cellcolor{addgreen}\code{000000}{\ \ \ \ \ \ \ \ new\_part\ }\code{666666}{=}\code{000000}{\ }\boxx{000000}{diffchargreen}{"\ "}\boxx{666666}{diffchargreen}{.}\boxx{000000}{diffchargreen}{join(}\code{000000}{sanitize(}\boxx{000000}{diffchargreen}{tok)\ }\boxx{008000}{diffchargreen}{for}\boxx{000000}{diffchargreen}{\ tok\ }\boxx{AA22FF}{diffchargreen}{in}\boxx{000000}{diffchargreen}{\ new\_tokens}\code{000000}{[j1:j2])} \\
+34 & \code{000000}{} & 34 & \code{000000}{} \\
+35 & \code{000000}{\textbackslash\ No\ newline\ at\ end\ of\ file} & 35 & \code{000000}{\textbackslash\ No\ newline\ at\ end\ of\ file} \\
+\hline
+\end{tabularx}
+\end{document}
