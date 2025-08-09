@@ -1,5 +1,4 @@
 from pydantic import BaseModel, Field
-from typing import Tuple
 from .cell import Cell
 
 
@@ -8,7 +7,7 @@ class Line(BaseModel):
     Base class for lines in a diff.
     """
 
-    content: Tuple[Cell, Cell] = Field(
+    content: tuple[Cell, Cell] = Field(
         ...,
         description="The content of the line, consisting of two cells: old and new.",
     )

@@ -1,5 +1,6 @@
+# pyright: reportUnknownMemberType=false, reportUnknownVariableType=false
 from pydantic import BaseModel, PrivateAttr
-from typing import List, Tuple, TextIO
+from typing import TextIO
 from .models import Line, Cell, CodeBlock
 from .utils import CharColorizer
 from difflib import SequenceMatcher
@@ -7,19 +8,19 @@ import re
 
 
 class Diff2Latex(BaseModel):
-    _parsed_lines: List[Line] = PrivateAttr(default_factory=list)
+    _parsed_lines: list[Line] = PrivateAttr(default_factory=list)
     colorizer: CharColorizer
 
     @staticmethod
-    def _clean_diff_file(lines: List[str]) -> List[str]:
+    def _clean_diff_file(lines: list[str]) -> list[str]:
         return [line for line in lines if not line.startswith(("---", "+++", "@@"))]
 
     @staticmethod
-    def _tokenize(line: str) -> List[str]:
+    def _tokenize(line: str) -> list[str]:
         return re.findall(r"\s+|\w+|[^\w\s]", line)
 
 
-    def _inline_diff(self, old_line: str, new_line: str) -> Tuple[List[CodeBlock], List[CodeBlock]]:
+    def _inline_diff(self, old_line: str, new_line: str) -> tuple[list[CodeBlock], list[CodeBlock]]:
         old_tokens = self._tokenize(old_line)
         new_tokens = self._tokenize(new_line)
         matcher = SequenceMatcher(None, old_tokens, new_tokens)
@@ -46,7 +47,7 @@ class Diff2Latex(BaseModel):
 
         return old_chunks, new_chunks
 
-    def _process_hunk(self, hunk: List[str], line_start: int = 1) -> List[Line]:
+    def _process_hunk(self, hunk: list[str], line_start: int = 1) -> list[Line]:
         deletions = [line[1:].rstrip() for line in hunk if line.startswith("-")]
         additions = [line[1:].rstrip() for line in hunk if line.startswith("+")]
         max_len = max(len(deletions), len(additions))
@@ -75,7 +76,7 @@ class Diff2Latex(BaseModel):
             elif old_line:
                 lines.append(Line(
                     content=(
-                        Cell(content=[CodeBlock(content=old_line)], line_nr=old_lineno).attach_colormap(old_line_colormap),
+                        Cell(content=[CodeBlock(content=old_line)], line_nr=old_lineno, bg_color="remred").attach_colormap(old_line_colormap),
                         Cell(content=[], line_nr=None)
                     ),
                 ))
@@ -84,16 +85,16 @@ class Diff2Latex(BaseModel):
                 lines.append(Line(
                     content=(
                         Cell(content=[], line_nr=None),
-                        Cell(content=[CodeBlock(content=new_line)], line_nr=new_lineno).attach_colormap(new_line_colormap)
+                        Cell(content=[CodeBlock(content=new_line)], line_nr=new_lineno, bg_color="addgreen").attach_colormap(new_line_colormap)
                     ),
                 ))
                 new_lineno += 1
 
         return lines
 
-    def parse(self, lines: List[str]) -> None:
+    def parse(self, lines: list[str]) -> None:
         clean_lines = self._clean_diff_file(lines)
-        hunk = []
+        hunk: list[str] = []
         line_nr = 1
 
         for line in clean_lines:

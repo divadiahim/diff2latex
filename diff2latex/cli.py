@@ -1,3 +1,6 @@
+# pyright: basic
+# fuck strict typing ong
+from typing import TextIO
 import click
 from .core import Diff2Latex
 from .core.utils import CharColorizer
@@ -34,11 +37,11 @@ def cli(ctx, **kwargs) -> None:
 @click.pass_context
 @click.argument("diff_file_path", type=click.File("r"))
 @click.argument("output_dir", type=click.Path(file_okay=False, dir_okay=True, writable=True))
-def build(ctx, diff_file_path: click.File, output_dir: click.File) -> None:
+def build(ctx, diff_file_path: TextIO, output_dir: str) -> None:
     """Build LaTeX from a diff file."""
     os.makedirs(output_dir, exist_ok=True)
 
-    colorizer = CharColorizer(style_name=ctx.obj["highlight"] if ctx.obj["highlight"] != "none" else None)
+    colorizer = CharColorizer(style_name=ctx.obj["highlight"] if ctx.obj["highlight"] != "none" else None) #?
     differ = Diff2Latex.build(diff_file_path, colorizer=colorizer)
     lines = differ.to_latex()
 
