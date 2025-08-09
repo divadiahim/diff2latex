@@ -54,8 +54,9 @@ def build(ctx, diff_file_path: TextIO, output_dir: str) -> None:
         fontsize=ctx.obj["font_size"],
         content=lines,
     )
-    with open(tex_path, "w") as tex_file:
-        tex_file.write(template)
+    if not ctx.obj.get("pdf_output", False):
+        with open(tex_path, "w") as tex_file:
+            tex_file.write(template)
 
     if ctx.obj.get("pdf_output", False):
         if shutil.which("lualatex") is None:
