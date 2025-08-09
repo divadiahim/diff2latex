@@ -25,7 +25,7 @@ A simple utility that produces github-styled diffs in a synthesizable LaTeX form
 
 - Grab 2 files that you want to diff and generate a plain diff `diff -u file_1 file_2 > example.diff`.
 - To generate a LaTeX diff run `diff2latex --highlight="default" build example.diff output`. This will create a directory named `output` containing `example.tex`.
-- To additionally generate a pdf pass the `--build-pdf` flag.
+- To additionally generate a pdf pass the `--pdf-output` flag.
 
 ## TODOs
 
