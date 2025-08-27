@@ -20,7 +20,7 @@ class CodeBlock(BaseModel):
     def _sanitize(self, s: str) -> str:
         """Sanitize string for LaTeX."""
         return (
-            s.replace("\\", "\\textbackslash")
+            s.replace("\\", "\\textbackslash ")
             .replace("%", "\\%")
             .replace("$", "\\$")
             .replace("&", "\\&")

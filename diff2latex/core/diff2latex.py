@@ -47,14 +47,13 @@ class Diff2Latex(BaseModel):
 
         return old_chunks, new_chunks
 
-    def _process_hunk(self, hunk: list[str], line_start: int = 1) -> list[Line]:
+    def _process_hunk(self, hunk: list[str], line_start: tuple[int, int]) -> list[Line] | tuple[int, int]:
         deletions = [line[1:].rstrip() for line in hunk if line.startswith("-")]
         additions = [line[1:].rstrip() for line in hunk if line.startswith("+")]
         max_len = max(len(deletions), len(additions))
 
         lines = []
-        old_lineno = line_start
-        new_lineno = line_start
+        old_lineno, new_lineno = line_start
 
         for i in range(max_len):
             old_line = deletions[i] if i < len(deletions) else ""
@@ -90,19 +89,21 @@ class Diff2Latex(BaseModel):
                 ))
                 new_lineno += 1
 
-        return lines
+        return lines, (old_lineno, new_lineno)
 
     def parse(self, lines: list[str]) -> None:
         clean_lines = self._clean_diff_file(lines)
         hunk: list[str] = []
-        line_nr = 1
+        old_line_nr = 1
+        new_line_nr = 1
 
         for line in clean_lines:
             if line.startswith(("-", "+")):
                 hunk.append(line)
             else:
                 if hunk:
-                    self._parsed_lines.extend(self._process_hunk(hunk, line_nr))
+                    processed_lines, (old_line_nr, new_line_nr) = self._process_hunk(hunk, (old_line_nr, new_line_nr))
+                    self._parsed_lines.extend(processed_lines)
                     hunk = []
 
                 line = line[1:].rstrip() if line.startswith(" ") else line.rstrip()
@@ -110,14 +111,15 @@ class Diff2Latex(BaseModel):
 
                 self._parsed_lines.append(Line(
                     content=(
-                        Cell(content=[CodeBlock(content=line)], line_nr=line_nr).attach_colormap(line_colormap),    
-                        Cell(content=[CodeBlock(content=line)], line_nr=line_nr).attach_colormap(line_colormap)
+                        Cell(content=[CodeBlock(content=line)], line_nr=old_line_nr).attach_colormap(line_colormap),    
+                        Cell(content=[CodeBlock(content=line)], line_nr=new_line_nr).attach_colormap(line_colormap)
                     ),
                 ))
-                line_nr += 1
+                old_line_nr += 1
+                new_line_nr += 1
 
         if hunk:
-            self._parsed_lines.extend(self._process_hunk(hunk, line_nr))
+            self._parsed_lines.extend(self._process_hunk(hunk, (old_line_nr, new_line_nr))[0])
 
     @classmethod
     def build(cls, file: TextIO, colorizer: CharColorizer) -> "Diff2Latex":

@@ -48,12 +48,15 @@ class Cell(BaseModel):
         """
         Convert the cell content to LaTeX format.
         """
+
+        line_nr_str = self.line_nr if bool(self.line_nr) else " "
+
         if self.bg_color:
             return (
-                f"\\cellcolor{{{self.bg_color}}}{self.line_nr} & \\cellcolor{{{self.bg_color}}}"
+                f"\\cellcolor{{{self.bg_color}}}{f"\\linenr{{{line_nr_str}}}"} & \\cellcolor{{{self.bg_color}}}"
                 + "".join(f"{code.to_latex()}" for code in self.content)
             )
-        return f"{self.line_nr} & " + "".join(
+        return f"{f"\\linenr{{{line_nr_str}}}"} & " + "".join(
             f"{code.to_latex()}" for code in self.content
         )
 
