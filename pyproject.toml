@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "diff2latex"
+dynamic = ["version"]
+description = "Simple utility that produces diffs in a LaTeX format"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "divadiahim"},
+]
+maintainers = [
+    {name = "divadiahim"},
+]
+keywords = ["diff", "latex", "pdf", "git", "version-control", "documentation"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Text Processing :: Markup :: LaTeX",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.7"
+dependencies = [
+    "click>=8.0.0",
+    "pydantic>=2.0.0",
+    "Pygments>=2.0.0",
+    "typing-extensions>=4.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "black",
+    "isort", 
+    "mypy",
+]
+
+[project.urls]
+Homepage = "https://github.com/divadiahim/diff2latex"
+Repository = "https://github.com/divadiahim/diff2latex"
+"Bug Reports" = "https://github.com/divadiahim/diff2latex/issues"
+
+[project.scripts]
+diff2latex = "diff2latex.cli:main"
+
+[tool.setuptools]
+packages = ["diff2latex"]
+
+[tool.setuptools.package-data]
+diff2latex = ["templates/*.tex"]
+
+[tool.setuptools_scm]
+write_to = "diff2latex/_version.py"

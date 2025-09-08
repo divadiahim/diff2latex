@@ -1,11 +1,50 @@
-test
-build*
+# Test directories
+test/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Environment
 .env
+venv/
+.venv/
+
+# Python cache
 *.pyc
-__pycache__
+__pycache__/
+*.pyo
+*.pyd
+
+# LaTeX build files
 *.aux
 *.log
 *.out
 *.fls
 *.fdb_latexmk
-*.egg-info
+*.synctex.gz
+*.toc
+*.bbl
+*.blg
+*.bcf
+*.run.xml
+_minted-*/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# MyPy
+.mypy_cache/

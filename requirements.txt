@@ -5,4 +5,4 @@ pydantic_core==2.33.2
 Pygments==2.19.2
 setuptools==80.9.0
 typing-inspection==0.4.1
-typing_extensions==4.14.1
+typing_extensions==4.14.0

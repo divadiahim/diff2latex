@@ -1,0 +1,9 @@
+include README.md
+include LICENSE
+include requirements.txt
+include USAGE.md
+include examples.py
+recursive-include diff2latex/templates *.tex
+recursive-include diff2latex/assets *
+global-exclude __pycache__
+global-exclude *.py[co]

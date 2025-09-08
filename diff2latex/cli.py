@@ -10,6 +10,7 @@ import shutil
 import tempfile
 import subprocess
 from . import __file__ as package_root
+from . import __version__
 
 TEMPLATE_PATH = os.path.join(os.path.dirname(package_root), "templates/template.tex")
 
@@ -21,7 +22,7 @@ def _load_template() -> Template:
 
 
 @click.group()
-@click.version_option()
+@click.version_option(version=__version__)
 @click.option("--font-family", default="Fira Code", help="Font family for the LaTeX document")
 @click.option("--font-size", default="10pt", help="Font size for the LaTeX document")
 @click.option("--highlight", default="none", help="Colorizer style for syntax highlighting")
