@@ -30,6 +30,13 @@ class CodeBlock(BaseModel):
             .replace("}", "\\}")
             .replace("#", "\\#")
             .replace("~", "\\~")
+            .replace("^", "\\^")
+            .replace("<", "\\textless{}")
+            .replace(">", "\\textgreater{}")
+            .replace("|", "\\textbar{}")
+            .replace("\"", "\\textquotedbl{}")
+            .replace("\'", "\\textquotesingle{}")
+            .replace("`", "\\textasciigrave{}")
         )
 
     def to_latex(self) -> str:
